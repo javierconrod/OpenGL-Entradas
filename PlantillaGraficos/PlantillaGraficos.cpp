@@ -13,26 +13,65 @@
 
 using namespace std;
 
-float posXTriangulo = 0.0f, posYTrianguilo = 0.0f;
+//Declarar una ventana
+GLFWwindow* window;
+
+float posXTriangulo = 0.0f, posYTriangulo = 0.0f, velocidadTriangulo = 0.5;
+
+double tiempoActual, tiempoAnterior;
+
 
 void teclado_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key==GLFW_KEY_RIGHT) {
-		posXTriangulo += 0.01;
+		posXTriangulo += velocidadTriangulo;
 	}
 	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT) {
-		posXTriangulo -= 0.01;
+		posXTriangulo -= velocidadTriangulo;
 	}
-
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP) {
+		posYTriangulo += velocidadTriangulo;
+	}
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN) {
+		posYTriangulo -= velocidadTriangulo;
+	}
 }
 
 void actualizar() {
+	tiempoActual = glfwGetTime();
+	double tiempoDiferencial = tiempoActual - tiempoAnterior;
+	//Definir estados
+	int estadoDerecha = glfwGetKey(window, GLFW_KEY_RIGHT);
+	int estadoIzquierda = glfwGetKey(window, GLFW_KEY_LEFT);
+	int estadoArriba = glfwGetKey(window, GLFW_KEY_UP);
+	int estadoAbajo = glfwGetKey(window, GLFW_KEY_DOWN);
+	int estadoShift = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
 
+	//Movimientos
+	if (estadoShift == GLFW_PRESS) {
+		velocidadTriangulo = 1.5;
+	}
+	else
+		velocidadTriangulo = 0.5;
+	if (estadoDerecha == GLFW_PRESS) {
+		posXTriangulo += velocidadTriangulo * tiempoDiferencial;
+	}
+	if (estadoIzquierda == GLFW_PRESS) {
+		posXTriangulo -= velocidadTriangulo * tiempoDiferencial;
+	}
+	if (estadoArriba == GLFW_PRESS) {
+		posYTriangulo += velocidadTriangulo * tiempoDiferencial;
+	}
+	if (estadoAbajo == GLFW_PRESS) {
+		posYTriangulo -= velocidadTriangulo * tiempoDiferencial;
+	}
+	
+	tiempoAnterior = tiempoActual;
 }
 
 void dibujar() {
 	glPushMatrix();
 
-	glTranslatef(posXTriangulo, posYTrianguilo, 0.0f);
+	glTranslatef(posXTriangulo, posYTriangulo, 0.0f);
 
 	glBegin(GL_TRIANGLES);
 
@@ -49,9 +88,6 @@ void dibujar() {
 
 int main()
 {
-	//Declarar una ventana
-	GLFWwindow* window;
-
 	//Si no se pudo iniciar GLFW
 	//Terminamos la ejecución
 	if (!glfwInit()) {
@@ -84,7 +120,10 @@ int main()
 	cout << "Version OpenGL: " << versionGL;
 
 	//Establecemos que con cada evento de teclado se llama a la función teclado_callback
-	glfwSetKeyCallback(window, teclado_callback);
+	//glfwSetKeyCallback(window, teclado_callback); 
+
+	tiempoActual = glfwGetTime();
+	tiempoAnterior = tiempoActual;
 
 	//Ciclo de dibujo (DrawLoop)
 	while (!glfwWindowShouldClose(window)) {
